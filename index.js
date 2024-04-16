@@ -8,7 +8,9 @@ const robots = {
 }
 
 async function start(){
-  const content = {} 
+  const content = {
+    maximumSentences: 7
+  }
 
   /*
   * Estou modificando um pouco a sugestão de estrutura do Content, pela API da propria Wikipedia,
@@ -53,7 +55,7 @@ async function start(){
       }
       return selectedPrefixText
   }
- 
+  console.log(JSON.stringify(content, null, 4))
 
 
 }

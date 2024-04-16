@@ -9,10 +9,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ibm-watson/natural-language-understanding-nodejs": "^0.4.0",
     "readline-sync": "^1.4.9",
     "rss-parser": "^3.6.3",
     "sbd": "^1.0.14",
     "superagent": "^4.1.0",
-    "unidecode": "^0.1.8"
+    "unidecode": "^0.1.8",
+    "watson-developer-cloud": "^3.18.2"
   }
 }
