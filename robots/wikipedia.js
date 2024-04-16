@@ -19,7 +19,6 @@ async function Wikipedia(content) {
     console.log('Searching content...')
     await getContent();
     console.log('Building Structure to others Robots...')
-    console.log(buildStructure())
     return await buildStructure();
     aw
     /*

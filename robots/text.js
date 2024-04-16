@@ -1,47 +1,45 @@
 // const algorithmia = require('algorithmia')
 // const algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
+const readline = require('readline-sync')
 const sentenceBoundaryDetection = require('sbd')
 const watsonApiKey = require('../credentials/watson-nlu.json').apikey
+const wikipedia = require('./wikipedia.js')
 const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js')
 
-var nlu = new NaturalLanguageUnderstandingV1({
+const nlu = new NaturalLanguageUnderstandingV1({
   iam_apikey: watsonApiKey,
   version: '2018-04-05',
-  url: 'https://gateway.watsonplatform.net/natural-language-understanding/api/'
+  url: 'https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/eddf63f0-481a-4649-bc73-f4211052548a'
 })
 
-async function Text(content) {
-  // await fetchContentFromWikipedia(content)
+const state = require('./state.js')
+
+async function Text() {
+
+  const content = state.load()
+  
+  content.wikiPediaContent = await wikipedia(content)
   sanitizeContent(content)
   breakContentIntoSentences(content)
   limitMaximumSentences(content)
   await fetchKeywordsOfAllSentences(content)
+
+  state.save(content)
+
   console.log('Build Sentences')
 
-  /*
-  *
-  * Com o Robo da Wikipedia não precisamos utilizar o Algorithmia e usar nossos credito no mesmo.
-  * 
-  * Assim sendo passo diretamente os valores para o robo de texto e utlizo o que o robo do Wikipedia retornou para mim
-  * 
-  */
-  // async function fetchContentFromWikipedia(content) {
-  //   const algorithmiaAuthenticated = algorithmia(algorithmiaApiKey)
-  //   const wikipediaAlgorithm = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2')
-  //   const wikipediaResponde = await wikipediaAlgorithm.pipe(content.searchTerm)
-  //   const wikipediaContent = wikipediaResponde.get()
-
-  //   content.sourceContentOriginal = wikipediaContent.content
-  // }
 
   function sanitizeContent(content) {
+
     const withoutBlankLinesAndMarkdown = removeBlankLinesAndMarkdown(content.wikiPediaContent.content)
     const withoutDatesInParentheses = removeDatesInParentheses(withoutBlankLinesAndMarkdown)
 
-    content.wikiPediaContent.sourceContentSanitized = withoutDatesInParentheses
+    content.wikiPediaContent.content = withoutDatesInParentheses
 
     function removeBlankLinesAndMarkdown(text) {
-      const allLines = text.split('\n')
+      
+      console.log(text)
+      const allLines = text.split("\r\n")
 
       const withoutBlankLinesAndMarkdown = allLines.filter((line) => {
         if (line.trim().length === 0 || line.trim().startsWith('=')) {
@@ -62,7 +60,7 @@ async function Text(content) {
   function breakContentIntoSentences(content) {
     content.sentences = []
 
-    const sentences = sentenceBoundaryDetection.sentences(content.wikiPediaContent.sourceContentSanitized)
+    const sentences = sentenceBoundaryDetection.sentences(content.sourceContentSanitized)
     sentences.forEach((sentence) => {
       content.sentences.push({
         text: sentence,
@@ -102,7 +100,6 @@ async function Text(content) {
       })
     })
   }
-
 }
 
 module.exports = Text
