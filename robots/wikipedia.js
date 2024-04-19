@@ -13,12 +13,9 @@ async function Wikipedia(content) {
     const references = [];
 
 
-    console.log('Fetching from Wikipedia...')
     var RealText = await getRealText(content.searchTerm)
     title = RealText;
-    console.log('Searching content...')
     await getContent();
-    console.log('Building Structure to others Robots...')
     return await buildStructure();
     aw
     /*
@@ -37,9 +34,7 @@ async function Wikipedia(content) {
             'format':"json"
         })
         if(res.body[1].length == 0){
-            console.log('Your search term don\'t return any result')
-            console.log('Tip: Search your therm in English or pre-search valid Words')
-            console.log('Exiting Program...')
+
             process.exit()
         }
         let sugestions = []
@@ -48,8 +43,7 @@ async function Wikipedia(content) {
         });
         let index = await selectTerm(sugestions)
         if(index == -1){
-            console.log('You don\'t selected any key')
-            console.log('Exiting Program...')
+
             process.exit()
         }
         url = res.body[3][index]
@@ -99,7 +93,6 @@ async function Wikipedia(content) {
         pageid = value.pageid;
         ctn = value.extract;
         summary =  value.extract.split('\n\n\n')[0]
-        console.log("Fetching Images...")
         for (let i = 0; i < value.images.length; i++) {
             await getURLImage(value.images[i].title);
         }
