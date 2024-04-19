@@ -8,8 +8,8 @@ const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-l
 
 const nlu = new NaturalLanguageUnderstandingV1({
   iam_apikey: watsonApiKey,
-  version: '2018-04-05',
-  url: 'https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/eddf63f0-481a-4649-bc73-f4211052548a'
+  version: '2022-03-30',
+  url: 'https://gateway.watsonplatform.net/natural-language-understanding/api/'
 })
 
 const state = require('./state.js')

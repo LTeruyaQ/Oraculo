@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@ibm-watson/natural-language-understanding-nodejs": "^0.4.0",
+    "googleapis": "^134.0.0",
     "readline-sync": "^1.4.9",
     "rss-parser": "^3.6.3",
     "sbd": "^1.0.14",
