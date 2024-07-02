@@ -1,38 +1,38 @@
-// const algorithmia = require('algorithmia')
-// const algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
 const sentenceBoundaryDetection = require('sbd')
+
 const watsonApiKey = require('../credentials/watson-nlu.json').apikey
 const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js')
-
-var nlu = new NaturalLanguageUnderstandingV1({
+ 
+const nlu = new NaturalLanguageUnderstandingV1({
   iam_apikey: watsonApiKey,
   version: '2018-04-05',
   url: 'https://gateway.watsonplatform.net/natural-language-understanding/api/'
 })
 
-async function Text(content) {
-  // await fetchContentFromWikipedia(content)
+const state = require('./state.js')
+
+async function robot() {
+  console.log('> [text-robot] Starting...')
+  const content = state.load()
+
+  await fetchContentFromWikipedia(content)
   sanitizeContent(content)
   breakContentIntoSentences(content)
   limitMaximumSentences(content)
   await fetchKeywordsOfAllSentences(content)
-  console.log('Build Sentences')
 
-  /*
-  *
-  * Com o Robo da Wikipedia não precisamos utilizar o Algorithmia e usar nossos credito no mesmo.
-  * 
-  * Assim sendo passo diretamente os valores para o robo de texto e utlizo o que o robo do Wikipedia retornou para mim
-  * 
-  */
-  // async function fetchContentFromWikipedia(content) {
-  //   const algorithmiaAuthenticated = algorithmia(algorithmiaApiKey)
-  //   const wikipediaAlgorithm = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2')
-  //   const wikipediaResponde = await wikipediaAlgorithm.pipe(content.searchTerm)
-  //   const wikipediaContent = wikipediaResponde.get()
+  state.save(content)
 
-  //   content.sourceContentOriginal = wikipediaContent.content
-  // }
+  async function fetchContentFromWikipedia(content) {
+    console.log('> [text-robot] Fetching content from Wikipedia')
+    const algorithmiaAuthenticated = algorithmia(algorithmiaApiKey)
+    const wikipediaAlgorithm = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2')
+    const wikipediaResponse = await wikipediaAlgorithm.pipe(content.searchTerm)
+    const wikipediaContent = wikipediaResponse.get()
+
+    content.sourceContentOriginal = wikipediaContent.content
+    console.log('> [text-robot] Fetching done!')
+  }
 
   function sanitizeContent(content) {
     const withoutBlankLinesAndMarkdown = removeBlankLinesAndMarkdown(content.wikiPediaContent.content)
@@ -62,7 +62,7 @@ async function Text(content) {
   function breakContentIntoSentences(content) {
     content.sentences = []
 
-    const sentences = sentenceBoundaryDetection.sentences(content.wikiPediaContent.sourceContentSanitized)
+    const sentences = sentenceBoundaryDetection.sentences(content.sourceContentSanitized)
     sentences.forEach((sentence) => {
       content.sentences.push({
         text: sentence,
@@ -77,8 +77,14 @@ async function Text(content) {
   }
 
   async function fetchKeywordsOfAllSentences(content) {
+    console.log('> [text-robot] Starting to fetch keywords from Watson')
+
     for (const sentence of content.sentences) {
+      console.log(`> [text-robot] Sentence: "${sentence.text}"`)
+
       sentence.keywords = await fetchWatsonAndReturnKeywords(sentence.text)
+
+      console.log(`> [text-robot] Keywords: ${sentence.keywords.join(', ')}\n`)
     }
   }
 
@@ -91,7 +97,8 @@ async function Text(content) {
         }
       }, (error, response) => {
         if (error) {
-          throw error
+          reject(error)
+          return
         }
 
         const keywords = response.keywords.map((keyword) => {
@@ -105,4 +112,4 @@ async function Text(content) {
 
 }
 
-module.exports = Text
+module.exports = robot
