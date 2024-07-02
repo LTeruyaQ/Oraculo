@@ -1,3 +1,5 @@
+const algorithmia = require('algorithmia')
+const algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
 const sentenceBoundaryDetection = require('sbd')
 
 const watsonApiKey = require('../credentials/watson-nlu.json').apikey
@@ -35,10 +37,10 @@ async function robot() {
   }
 
   function sanitizeContent(content) {
-    const withoutBlankLinesAndMarkdown = removeBlankLinesAndMarkdown(content.wikiPediaContent.content)
+    const withoutBlankLinesAndMarkdown = removeBlankLinesAndMarkdown(content.sourceContentOriginal)
     const withoutDatesInParentheses = removeDatesInParentheses(withoutBlankLinesAndMarkdown)
 
-    content.wikiPediaContent.sourceContentSanitized = withoutDatesInParentheses
+    content.sourceContentSanitized = withoutDatesInParentheses
 
     function removeBlankLinesAndMarkdown(text) {
       const allLines = text.split('\n')
